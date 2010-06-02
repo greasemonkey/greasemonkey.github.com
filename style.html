@@ -91,6 +91,7 @@ var loader = Cc["@mozilla.org/moz/jssubscript-loader;1"]
 <li>Event handler functions should be prefixed with the word on, in particular try to use the names onLoad, onDialogAccept, onDialogCancel, etc., where this is unambiguous.</li>
 <li>Function names, local variables, and object members have no prefix.</li>
 <li>Try to declare local variables as near to their use as possible; initialize every variable.</li>
+<li>Only declare a variable once in each scope.</li>
 </ul>
 <h2>JavaScript Features</h2>
 <ul>
@@ -109,7 +110,7 @@ var loader = Cc["@mozilla.org/moz/jssubscript-loader;1"]
 <h2>Suggestions</h2>
 <p>These guidelines are not hard and fast rules, but almost always a good idea.  Please try to follow them.</p>
 <ul>
-<li>Be very careful about assignments that are also used in a boolean context, e.g. <pre>while (node = node.parentNode) { /* ... */ }</pre>  Try to avoid such usage, or carefully comment that testing the result of an assignment as a boolean is actually intended.  (Common exception: iterating over an array with <code>for</code>.)</li>
+<li>Be very careful about assignments that are also used in a boolean context, e.g. <pre>while (node = node.parentNode) { /* ... */ }</pre> or <pre>for (var i=0, item; item=array[i]; i++) { /* ... */ }</pre>This can be a common source of subtle bugs.</li>
 <li>When a <code>switch</code> statement's <code>case</code> contains a body, and intentionally falls through to the next (with no <code>break</code>), add a comment like <code>// fall-through</code> to make it clear that this is intended.</li>
 <li>Don't use <code>eval()</code> or equivalents if there is any other possible way to accomplish the goal.</li>
 <li>Don't use <code>setTimeout()</code> or equivalents with string parameters, only function references.  Generally avoid <code>setTimeout()</code> if at all possible &mdash; if not, comment why it was used.</li>
