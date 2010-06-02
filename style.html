@@ -23,12 +23,29 @@ pre {
 <p>This guide is based on a Mozilla JavaScript Style Guide document which no longer exists (and was previously the Greasemonkey style guide), which in turn was based on a <a href='http://web.archive.org/web/20080328023013/http://web.archive.org/web/20080328023013/http://neil.rashbrook.org/Js.htm'>document by Niel Rashbrook</a>.</p>
 <h2>Whitespace</h2>
 <ul>
-<li>Indent blocks with two spaces.  No tabs.</li>
+<li>Indent blocks with two spaces. No tabs. Thus, blocks should be indented as:<pre>if (dlmgrWindow) {
+  dlmgrWindow.focus();
+} else {
+  dlmgr.open(window, null);
+}</pre></li>
 <li>Lines should be no longer than 80 characters.</li>
-<li>When breaking statements across multiple lines, continuation lines should be indented by four spaces.</li>
+<li>When breaking statements across multiple lines, continuation lines should be indented by four spaces (not to align with something on the previous lines).  For any "block" (function arguments, object literal contents, etc) the contents should all be on the following indented line, not following the opening brace.  Or, bad:
+<pre>compMgr.registerFactoryLocation(CID,
+                                CLASSNAME,
+                                CONTRACTID,
+                                fileSpec,
+                                location,
+                                type);</pre>
+Bad:
+<pre>compMgr.registerFactoryLocation(CID, CLASSNAME, CONTRACTID, fileSpec,
+    location, type);</pre>
+Good:
+<pre>compMgr.registerFactoryLocation(
+    CID, CLASSNAME, CONTRACTID, fileSpec, location, type);</pre>
+</li>
 <li>Surround binary operators with single spaces.</li>
 <li>Put a single space after keywords (if, for, etc).</li>
-<li>One (or two) blank lines between block definitions. Also consider breaking up large code blocks with blank lines.</li>
+<li>Two blank lines between "top level" function/method definitions (those in the global scope, or in prototypes; not for locally scoped helper functions). Also consider breaking up distinct sections of code inside functions with blank lines.</li>
 <li>Files should contain exactly one newline at the end.</li>
 <li>Lines should have no trailing whitespace.</li>
 </ul>
@@ -37,35 +54,43 @@ pre {
 <li>Spaces around braces used for in-line functions or objects, except before commas or semicolons, e.g. <pre>function valueObject(aValue) { return { value: aValue }; }</pre></li>
 <li>Otherwise spaces are not necessary inside brackets.</li>
 <li>Prefer double quotes, except when quoting double quotes.</li>
-<li>Braces are not indented relative to their parent statement. Blocks should be indented as:<pre>if (dlmgrWindow) {
-  dlmgrWindow.focus();
-} else {
-  dlmgr.open(window, null);
-}</pre>
+<li>
 Braces on if/else statements are not optional, unless the entire compound statement fits completely on one line.</li>
+<li>
+When continuing a single statement across a line, operators should be at the beginning of the continued line, including the dot (scope resolution).  Examples:
+<pre>if (stack.filename != null
+    && stack.filename != gmSvcFilename
+    && stack.filename.substr(0, 6) != "chrome"
+) {
+  // ...
+}
+
+var loader = Cc["@mozilla.org/moz/jssubscript-loader;1"]
+    .getService(Ci.mozIJSSubScriptLoader);</pre>
+</li>
 </ul>
 <h2>Code Style</h2>
 <ul>
-<li>Always put else on its own line, as shown above. </li>
+<li>Always put else on its own line, as shown in the "Whitespace" section.</li>
 <li>Name inline functions, this makes it easier to debug them. Just assigning a function to a property doesn't name the function, you should to do something like: <pre>var offlineObserver = {
   observe: function OO_observe(aSubject, aTopic, aState) {
     if (aTopic == "network:offline-status-changed")
       setOfflineUI(aState == "offline");
   }
-};</pre></li>
+};</pre>This helps with a number of editing and debugging tools.</li>
 </ul>
 <h2>Function and variable naming</h2>
 <ul>
 <li>Unless otherwise specified, use camelCasedNames.</li>
 <li>Constants should be in <code>UPPER_CASE</code>.</li>
 <li>Use InterCaps and capitalize the first letter of constructors.</li>
-<li>Do not pollute the global namespace.  Objects and functions should use a <code>GM_</code> name prefix.</li>
-<li>Global variables should be prefixed with the letter g, e.g. gFormatToolbar.</li>
-<li>Arguments (parameter names) should be prefixed with the letter a.</li>
-<li>Private members should start with <code>_</code>, e.g. <code>_internalFunction</code>.</li>
+<li>Do not pollute the global namespace.  Global (chrome window scoped) definitions should be avoided, but at least use a <code>GM_</code> name prefix.</li>
+<li>Global state variables should be prefixed with the letter <code>g</code>, e.g. <code>gFormatToolbar</code>.</li>
+<li>Arguments (parameter names) should be prefixed with the letter <code>a</code>.</li>
+<li>Private members should start with <code>_</code>, e.g. <code>_internalFunction</code>.  They should not be accessed except by the class they are a member of.</li>
 <li>Event handler functions should be prefixed with the word on, in particular try to use the names onLoad, onDialogAccept, onDialogCancel, etc., where this is unambiguous.</li>
 <li>Function names, local variables, and object members have no prefix.</li>
-<li>Try to declare local variables as near to their use as possible; try to initialize every variable.</li>
+<li>Try to declare local variables as near to their use as possible; initialize every variable.</li>
 </ul>
 <h2>JavaScript Features</h2>
 <ul>
@@ -73,8 +98,8 @@ Braces on if/else statements are not optional, unless the entire compound statem
  warnings, such as:
   <ul>
   <li>Duplicate variable declaration</li>
-  <li> Mixing <code>return;</code> with <code>return value;</code></li>
-  <li> Trailing comma in JavaScript object declarations</li>
+  <li>Mixing <code>return;</code> with <code>return value;</code></li>
+  <li>Trailing comma in JavaScript object declarations.</li>
   </ul>
 </li>
 <li>Use <code>[value1, value2]</code> to create a JavaScript array in preference to using new <code>Array(value1, value2)</code>.</li>
@@ -84,11 +109,11 @@ Braces on if/else statements are not optional, unless the entire compound statem
 <h2>Suggestions</h2>
 <p>These guidelines are not hard and fast rules, but almost always a good idea.  Please try to follow them.</p>
 <ul>
-<li>Be very careful about assignments that are also used in a boolean context, e.g. <pre>while (node = node.parentNode) { /* ... */ }</pre>  Try to avoid such usage, or carefully comment that testing the result of an assignment as a boolean is actually intended.</li>
+<li>Be very careful about assignments that are also used in a boolean context, e.g. <pre>while (node = node.parentNode) { /* ... */ }</pre>  Try to avoid such usage, or carefully comment that testing the result of an assignment as a boolean is actually intended.  (Common exception: iterating over an array with <code>for</code>.)</li>
 <li>When a <code>switch</code> statement's <code>case</code> contains a body, and intentionally falls through to the next (with no <code>break</code>), add a comment like <code>// fall-through</code> to make it clear that this is intended.</li>
 <li>Don't use <code>eval()</code> or equivalents if there is any other possible way to accomplish the goal.</li>
-<li>Don't use <code>setTimeout()</code> or equivalents with string parameters, only function references.</li>
-<li>Keep threads, and especially commits, topically relevant.  Don't put code refactoring and new features together in one commit, or even together in a branch if at all possible.</li>
+<li>Don't use <code>setTimeout()</code> or equivalents with string parameters, only function references.  Generally avoid <code>setTimeout()</code> if at all possible &mdash; if not, comment why it was used.</li>
+<li>Keep branches, and especially commits, topically relevant.  Don't put code refactoring and new features together in one commit, or even together in a branch if at all possible.</li>
 </ul>
 </body>
 </html>
